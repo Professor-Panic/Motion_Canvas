@@ -1,0 +1,32 @@
+{
+    "diagnostics.globals": [
+        "BLUE",
+        "Circle",
+        "EaseInCubic",
+        "EaseInOutBack",
+        "EaseInOutQuad",
+        "EaseInSine",
+        "EaseOutBounce",
+        "EaseOutCubic",
+        "EaseOutElastic",
+        "GREEN",
+        "Kill",
+        "Line",
+        "PI",
+        "Parallel",
+        "RED",
+        "Rect",
+        "Rectangle",
+        "Repeat",
+        "Scene",
+        "Sequence",
+        "Shape",
+        "Square",
+        "TAU",
+        "Vector2",
+        "WHITE",
+        "move_to",
+        "rgba",
+        "wait"
+    ]
+}
