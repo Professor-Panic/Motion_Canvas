@@ -50,7 +50,9 @@ def mul(a, k):
         return Vector2(a.x * k, a.y * k)
     return a * k
 
-
+def rotate_point(p, angle):
+    c, s = math.cos(angle), math.sin(angle)
+    return Vector2(p.x * c - p.y * s, p.x * s + p.y * c)
 # ---------------------------------------------------------------- easings
 
 # ---------------------------------------------------------------- animations
@@ -266,6 +268,9 @@ class Shape:
         Shape.instances.add(self)
         self.color = BLACK
         self.rotation = 0.0            # on every shape, so rotate works on circles too
+        # Shape.__init__
+        self.filled = True
+        self.stroke_width = 0.002
         self.z=0
     # absolute
     def move_to(self, position, time, ease=lambda t: t):

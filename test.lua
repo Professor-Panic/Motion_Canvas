@@ -24,31 +24,29 @@ local function done()
     print("Done with animations")
 end
 function Main()
-    local line = Line(Vector2(0.5, 0.5), 1.0, 0.005)
-    line.color = WHITE
-    line.z = 1
-    Scene.spawn_object(line)
+    -- an unfilled square whose stroke_width animates, so the outline visibly thickens
+    local square = Square(Vector2(0.3, 0.5), 0.3)
+    square.color = WHITE
+    square.filled = false
+    square.stroke_width = 0.002
+    square.z = 1
+    Scene.spawn_object(square)
 
-    local spin = Repeat(line.rotate_by(TAU/2, 1.0), 5)
-    spin.on_finish = function() line.color = BLUE end
-    Play(spin)
+    -- tween stroke_width directly -- it's just an attribute, so Tween handles it for free
+    Play(Sequence(
+        Tween(square, "stroke_width", 0.05, 1.0),
+        Tween(square, "stroke_width", 0.002, 0.5)
+    ))
 
-    local circle = Circle(Vector2(0.5, 0.5), 0.05)
-    circle.color = RED
-    circle.z = 2
-    Scene.spawn_object(circle)
+    Wait(3.0)
 
-    local grow = Parallel(circle.resize_to(0.15, 1.5, EaseOutBounce), circle.fade_in(1.5))
-    grow.on_finish = function() circle.color = GREEN end
-    Play(grow)
+    -- a rotating outlined rect to confirm draw_rect_lines_rotated tracks rotation correctly
+    local rect = Rect(Vector2(0.7, 0.5), Vector2(0.4, 0.2))
+    rect.color = GREEN
+    rect.filled = false
+    rect.stroke_width = 0.01
+    rect.z = 2
+    Scene.spawn_object(rect)
 
-    Wait(1.5)
-
-    local moves = Sequence(
-        circle.move_to(Vector2(0.2, 0.2), 1.0),
-        circle.move_to(Vector2(0.8, 0.2), 1.0),
-        circle.move_to(Vector2(0.5, 0.8), 1.0)
-    )
-    moves.on_finish = function() circle.color = BLUE end
-    Play(moves)
+    Play(Repeat(rect.rotate_by(TAU, 2.0), 3))
 end

@@ -7,30 +7,61 @@ lua.execute(Path(__file__).with_name("prelude.lua").read_text(encoding="utf-8"))
 load_script(lua=lua,path="test.lua")
 
 g=lua.globals()
+def draw_rect_lines_rotated(px, py, w, h, origin, rotation_rad, thickness, color):
+    local_corners = [Vector2(0, 0), Vector2(w, 0), Vector2(w, h), Vector2(0, h)]
+    pts = []
+    for c in local_corners:
+        rel = Vector2(c.x - origin.x, c.y - origin.y)
+        r = rotate_point(rel, rotation_rad)
+        pts.append(Vector2(px + r.x, py + r.y))
+
+    half = thickness / 2.0
+    for i in range(4):
+        a = pts[i]
+        b = pts[(i + 1) % 4]
+        dx, dy = b.x - a.x, b.y - a.y
+        length = math.hypot(dx, dy)
+        if length == 0:
+            continue
+        ux, uy = dx / length, dy / length
+        ext_a = Vector2(a.x - ux * half, a.y - uy * half)
+        ext_b = Vector2(b.x + ux * half, b.y + uy * half)
+        draw_line_ex(ext_a, ext_b, thickness, color)
 def Draw_Scene_Objects(scene, width, height):
     m = min(width, height)
     for obj in sorted(scene.objects,key=lambda obj:obj.z):
         px, py = obj.position.x * width, obj.position.y * height
         if isinstance(obj, Circle):
-            draw_circle_v(Vector2(px, py), obj.r * m / 2, obj.color)
+            if obj.filled:
+                draw_circle_v(Vector2(px, py), obj.r * m / 2, obj.color)
+            else:
+                draw_circle_lines_v(Vector2(px, py), int(obj.r * m / 2), obj.color)
         elif isinstance(obj, Square):
             side = obj.size * m
             origin = Vector2(side * obj.anchor.x, side * obj.anchor.y)
-            draw_rectangle_pro(
-                Rectangle(px, py, side, side),     # x, y = where the origin point lands on screen
-                Vector2(side / 2, side / 2),       # origin in pixels, relative to the rect's top-left
-                obj.rotation*360/(2*math.pi),                      # degrees
-                obj.color,
-            )
+            if obj.filled:
+                draw_rectangle_pro(
+                    Rectangle(px, py, side, side),
+                    origin,
+                    obj.rotation * 360 / (2 * math.pi),
+                    obj.color,
+                )
+            else:
+                draw_rect_lines_rotated(px, py, side, side, origin, obj.rotation, obj.stroke_width * m, obj.color)
+
         elif isinstance(obj, Rect):
-            side =Vector2(obj.size.x*width,obj.size.y*height)
-            origin = Vector2(side * obj.anchor.x, side * obj.anchor.y)
-            draw_rectangle_pro(
-                Rectangle(px, py,side.x,side.y),     # x, y = where the origin point lands on screen
-                origin,       # origin in pixels, relative to the rect's top-left
-                obj.rotation*360/(2*math.pi),                      # degrees
-                obj.color,
-            )
+            side = Vector2(obj.size.x * width, obj.size.y * height)
+            origin = Vector2(side.x * obj.anchor.x, side.y * obj.anchor.y)
+            if obj.filled:
+                draw_rectangle_pro(
+                    Rectangle(px, py, side.x, side.y),
+                    origin,
+                    obj.rotation * 360 / (2 * math.pi),
+                    obj.color,
+                )
+            else:
+                draw_rect_lines_rotated(px, py, side.x, side.y, origin, obj.rotation, obj.stroke_width * m, obj.color)
+                
         elif isinstance(obj, Line):
             offset = obj.length * m * obj.anchor
             start = Vector2(px - math.cos(obj.rotation) * offset,
@@ -61,7 +92,7 @@ class Runner:
 
 runner = Runner(g.Main)
 def run():
-    rl.InitWindow(1200,800,"Motion_Engine")
+    init_window(1200,800,"Motion_Engine")
     set_target_fps(60)
     while not window_should_close():
         dt=get_frame_time()
@@ -70,8 +101,9 @@ def run():
             g.Scene.paused=not g.Scene.paused
         runner.update(dt)
         rl.BeginDrawing()
-        rl.ClearBackground(rl.BLACK)
+        rl.ClearBackground(BLACK)
         Draw_Scene_Objects(g.Scene,1200,800)
+        draw_fps(20,20)
         rl.EndDrawing()
     close_window()
 run()

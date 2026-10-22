@@ -55,7 +55,8 @@ def Load_Lua():
         "TAU": 2 * math.pi,
         "Parallel": Parallel,
         "Sequence": Sequence,
-        "Repeat": Repeat
+        "Repeat": Repeat,
+        "Tween":Tween
     }
 
     for name, value in exports.items():

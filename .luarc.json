@@ -23,6 +23,7 @@
         "Shape",
         "Square",
         "TAU",
+        "Tween",
         "Vector2",
         "WHITE",
         "move_to",
